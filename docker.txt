@@ -1,0 +1,96 @@
+What is Docker?
+---------------
+- software container platform
+- eliminate “works on my machine” problems
+- run and manage apps side-by-side in isolated containers to get better compute density
+- build agile software delivery pipelines to ship new features faster, more securely and with confidence
+
+
+What is a Container?
+--------------------
+- a way to package software in a format that can run isolated on a shared operating system
+- unlike VMs, containers do not bundle a full operating system - only libraries and settings required to make the software work
+- software will always run the same, regardless of where it's deployed
+
+
+Installing Docker
+-----------------
+https://docs.docker.com/engine/installation/
+https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/
+
+sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-get install docker-ce
+sudo docker run hello-world
+
+
+Running Docker without sudo
+---------------------------
+https://docs.docker.com/engine/installation/linux/linux-postinstall/#manage-docker-as-a-non-root-user
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+# logout / login
+docker run hello-world
+
+
+Mongo
+-----
+docker run --name foo-mongo --detach mongo:3.4.6
+docker exec -it foo-mongo mongo
+
+
+Postgres
+--------
+docker run --name foo-postgres --env POSTGRES_USER=bar --env POSTGRES_DB=bar --detach postgres:9.6.3
+docker exec -it foo-postgres psql -U bar bar
+
+
+MySQL
+-----
+docker run --name foo-mysql -e MYSQL_ROOT_PASSWORD=bar -e MYSQL_USER=bar -e MYSQL_PASSWORD=bar -e MYSQL_DATABASE=bar --detach mysql:5.7.19
+docker exec -it foo-mysql mysql -u bar -pbar bar
+
+
+RabbitMQ
+--------
+docker run --name foo-rabbit --detach rabbitmq:3.6.10-management
+
+
+Connecting to services
+----------------------
+# Option 1: Find out the IP and use it
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' foo-rabbit
+
+# Option 2: Publish single ports when creating container
+docker run --name foo-rabbit2 --publish 15671:15671 --publish 15672:15672 --detach rabbitmq:3.6.10-management
+
+# Option 3: Create random port mappings when creating container
+docker run --name foo-rabbit3 --publish-all --detach rabbitmq:3.6.10-management
+
+
+Cleanup unused containers
+-------------------------
+# List containers
+docker ps -a
+
+# Remove single container
+docker rm -f -v <container name or id>
+
+# Remove all containers
+docker ps -a -q | xargs docker rm -f -v
+
+
+Cleanup unused images
+---------------------
+# List images
+docker images
+
+# Remove single image
+docker rmi -f hello-world
+
+# Remove all images
+docker images -q | xargs docker rmi -f
